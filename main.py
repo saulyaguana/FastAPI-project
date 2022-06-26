@@ -1,8 +1,10 @@
 #Python
 from typing import Optional
+from enum import Enum
 
 #Pydantic
 from pydantic import BaseModel
+from pydantic import Field, EmailStr
 
 #FastApi
 from fastapi import FastAPI
@@ -11,18 +13,70 @@ from fastapi import Body, Query, Path
 app = FastAPI()
 
 #Models
+class Countrys(Enum):
+    Ecuador = "Ecuador"
+    Argelia = "Argelia"
+    Holanda = "Holanda"
+    Dinamarca = "Dinamarca"
+    Finlandia = "Finlandia"
+
+class HairColor(Enum):
+    white = "White"
+    Black = "Black"
+    Brown = "Brown"
+    Yellow = "Blonde"
+    Red = "Red"
+
 class Location(BaseModel):
-    city: str
-    state: str
-    country: str
+    city: str = Field(
+        ...,
+        min_length=1,
+        max_length=30, #estos son parámetros
+        title="City",
+        description="City where you live",
+        example="Amsterdam"
+    )
+    state: str = Field(
+        ...,
+        min_length=1,
+        max_length=30,
+        title="State",
+        description="State where you live",
+        example="State of Amsterdam"
+    )
+    country: Countrys = Field(...)
 
 
 class Person(BaseModel):
-    first_name: str
-    last_name: str
-    age: int
-    hair_color: Optional[str] = None
-    is_married: Optional[bool] = None
+    first_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50
+    )
+    last_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50
+    )
+    age: int = Field(
+        ...,
+        gt=0,
+        le=115
+    )
+    hair_color: Optional[HairColor] = Field(default=None)
+    is_married: Optional[bool] = Field(default=None)
+    email: EmailStr = Field(...)
+    class Config:
+        schema_extra = {
+            "example" : {
+                "first_name": "Gideon",
+                "last_name": "Emery",
+                "age": 35,
+                "hair_color": "Black",
+                "is_married": True,
+                "email": "joker@atlas.com"
+            }
+        }
 
 
 @app.get("/")
@@ -44,12 +98,16 @@ def show_person(
         min_length=1,
         max_length=50,
         title="Person Name",
-        description="This is the person name. It's between 1 and 50 characters"
+        description="This is the person name. It's between 1 and 50 characters",
+        example="Alan"
         ),
     age: int = Query(
         ...,
+        ge=1,
+        le=115,
         title="Person age",
-        description="This is the person age. It's required"
+        description="This is the person age. It's required",
+        example=45
         )
 ):
     return {name: age}
@@ -62,7 +120,8 @@ def show_person(
         ...,
         gt=0,
         title="Person ID",
-        description="This is the Person ID"
+        description="This is the Person ID",
+        example=117
         )
 ):
     return {person_id: "Right"}
@@ -75,11 +134,13 @@ def update_person(
         ...,
         title="Person ID",
         description="This is the Person ID",
-        gt=0
+        gt=0,
+        example=609
     ),
-    person_body: Person = Body(...),
+    #person_body: Person = Body(...),
     place: Location = Body(...),
 ):
-    result = person_body.dict()
-    result.update(place.dict())
-    return result
+    #result = person_body.dict()
+    #result.update(place.dict())
+    #return result 
+    return place
