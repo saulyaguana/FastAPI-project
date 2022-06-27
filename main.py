@@ -66,6 +66,7 @@ class Person(BaseModel):
     hair_color: Optional[HairColor] = Field(default=None)
     is_married: Optional[bool] = Field(default=None)
     email: EmailStr = Field(...)
+    password: str = Field(..., min_length=8)
     class Config:
         schema_extra = {
             "example" : {
@@ -74,10 +75,30 @@ class Person(BaseModel):
                 "age": 35,
                 "hair_color": "Black",
                 "is_married": True,
-                "email": "joker@atlas.com"
+                "email": "joker@atlas.com",
+                "password": "IworkinAtlasCorporation"
             }
         }
 
+class PersonOut(BaseModel):
+    first_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50
+    )
+    last_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50
+    )
+    age: int = Field(
+        ...,
+        gt=0,
+        le=115
+    )
+    hair_color: Optional[HairColor] = Field(default=None)
+    is_married: Optional[bool] = Field(default=None)
+    email: EmailStr = Field(...)
 
 @app.get("/")
 def home():
@@ -85,7 +106,7 @@ def home():
 
 #Request and Responde Body
 
-@app.post("/person/new")
+@app.post("/person/new", response_model=PersonOut)
 def create_person(people: Person = Body(...)):
     return people
 
