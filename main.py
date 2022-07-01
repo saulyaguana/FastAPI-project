@@ -145,7 +145,8 @@ def create_person(people: Person = Body(...)):
     path="/person/detail",
     status_code=status.HTTP_200_OK,
     tags=["Persons"],
-    summary="Show Person Data"
+    summary="Show Person Data",
+    deprecated=True
     )
 def show_person(
     name: Optional[str] = Query(
